@@ -116,6 +116,10 @@ void ShenandoahAdaptiveHeuristics::choose_collection_set_from_regiondata(Shenand
       cset->add_region(r);
       cur_cset = new_cset;
       cur_garbage = new_garbage;
+    } else if (cur_garbage >= min_garbage) {
+      // Min garbage condition satisified, and the regions left don't have enough garbage
+      // to be considered worth collection.
+      break;
     }
   }
 }
