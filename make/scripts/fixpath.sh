@@ -93,7 +93,17 @@ function setup() {
   # Prohibit msys2 from meddling with paths
   export MSYS2_ARG_CONV_EXCL="*"
   #  Make sure WSL gets a copy of the path
-  export WSLENV=PATH/l
+  if [[ x`type -p wslpath` != "x" ]]; then
+      if [[ -x /bin/egrep ]]; then
+          WINDOWS_VERSION=`$CMD /c ver |/bin/egrep -o '[0-9.]+'`
+      fi
+      if [[ "$WINDOWS_VERSION" < "10.0.22000" ]]; then
+      	NEED_WSLENV=1
+      fi
+  fi
+  if [[ "x$NEED_WSLENV" != "x" ]]; then  
+      export WSLENV=PATH/l
+  fi
 }
 
 # Cleanup handling
@@ -423,7 +433,9 @@ function exec_command_line() {
         # Set the variable to the converted result
         export $key="$result"
         # While this is only needed on WSL, it does not hurt to do everywhere
-        export WSLENV=$WSLENV:$key/w
+        if [[ "x$NEED_WSLENV" != "x" ]]; then  
+          export WSLENV=$WSLENV:$key/w
+        fi
       else
         # The actual command will be executed by bash, so don't convert it
         command="$arg"
